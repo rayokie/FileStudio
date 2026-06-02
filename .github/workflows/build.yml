@@ -34,19 +34,23 @@ jobs:
           cordova create CloudApp com.format.converterstudio "Format Converter"
           cd CloudApp
           
-          # Wipe the default files
+          # Wipe the empty default files
           rm -rf www/*
           
-          # Force copy the CONTENTS of your www folder, not the folder itself
-          USER_WWW=$(find ../temp_zip -type d -name "www" | head -n 1)
+          # BULLETPROOF FILE FINDER: Find index.html directly, no matter where it is hiding
+          USER_INDEX=$(find ../temp_zip -name "index.html" | head -n 1)
+          USER_WWW=$(dirname "$USER_INDEX")
+          
+          # Copy your real code into the app
           cp -a "$USER_WWW"/. www/
           
+          # Safely find and copy your icon
           USER_ICON=$(find ../temp_zip -type f -name "icon.png" | head -n 1)
           if [ ! -z "$USER_ICON" ]; then
             cp "$USER_ICON" icon.png
           fi
           
-          # The ultimate Config file with Android HTTP bypass rules
+          # The ultimate Config file (Now with Network Access so your PDF tools load!)
           cat << 'EOF' > config.xml
           <?xml version='1.0' encoding='utf-8'?>
           <widget id="com.format.converterstudio" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
@@ -54,11 +58,12 @@ jobs:
               <description>Direct File Conversion</description>
               <author email="dev@null.com" href="https://example.com">Studio</author>
               <content src="index.html" />
+              <access origin="*" />
               <allow-intent href="http://*/*" />
               <allow-intent href="https://*/*" />
-              <preference name="scheme" value="http" />
+              <allow-navigation href="*" />
+              <preference name="scheme" value="https" />
               <preference name="hostname" value="localhost" />
-              <preference name="AndroidInsecureFileModeEnabled" value="true" />
               <icon src="icon.png" />
           </widget>
           EOF
