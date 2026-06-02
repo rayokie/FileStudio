@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '18'
 
       - name: Install Cordova
         run: npm install -g cordova
@@ -33,11 +33,11 @@ jobs:
 
       - name: Build APK
         run: |
-          # Find the folder
-          APP_DIR=$(dirname $(find my_app_extract -name "config.xml" | head -n 1))
+          # Find the root of the project safely
+          APP_DIR=$(dirname $(find my_app_extract -name "www" | head -n 1))
           cd "$APP_DIR"
           
-          # Force a perfectly clean config.xml to bypass the parsing error
+          # Force a perfectly clean config.xml
           cat << 'EOF' > config.xml
           <?xml version='1.0' encoding='utf-8'?>
           <widget id="com.format.converterstudio" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
@@ -51,7 +51,7 @@ jobs:
           </widget>
           EOF
           
-          # Clean up old Termux files
+          # Nuke any leftover phone-specific setup
           rm -rf platforms node_modules plugins package-lock.json
           npm install
           
@@ -69,4 +69,5 @@ jobs:
         with:
           name: App-APK
           path: output-apk/*.apk
+          
           
