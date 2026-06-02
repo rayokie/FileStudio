@@ -27,20 +27,32 @@ jobs:
         run: npm install -g cordova
 
       - name: Extract Project
-        run: unzip FormatConverter.zip
+        run: |
+          mkdir my_app_extract
+          unzip FormatConverter.zip -d my_app_extract
 
       - name: Build APK
         run: |
-          cd FormatConverter
+          # Automatically find the project files no matter how it was zipped
+          APP_DIR=$(dirname $(find my_app_extract -name "config.xml" | head -n 1))
+          cd "$APP_DIR"
+          
+          # Clean up old Termux files
           rm -rf platforms node_modules plugins package-lock.json
           npm install
+          
+          # Build the App
           cordova platform add android
           cordova plugin add cordova-plugin-file
           cordova build android
+          
+          # Move the finished APK to the upload zone
+          mkdir -p $GITHUB_WORKSPACE/output-apk
+          cp platforms/android/app/build/outputs/apk/debug/*.apk $GITHUB_WORKSPACE/output-apk/
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: App-APK
-          path: FormatConverter/platforms/android/app/build/outputs/apk/debug/*.apk
+          path: output-apk/*.apk
           
