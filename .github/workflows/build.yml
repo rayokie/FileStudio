@@ -28,90 +28,42 @@ jobs:
 
       - name: Build from Scratch
         run: |
-          mkdir temp_zip
           unzip FormatConverter.zip -d temp_zip
-          
           cordova create CloudApp com.format.converterstudio "Format Converter"
           cd CloudApp
           
           # Delete the dummy Cordova robot code
           rm -rf www/*
           
-          # DIRECT COPY: Grab your actual files based on your video, ignore the Termux backup!
+          # Copy your actual HTML/CSS/JS files
           cp -r ../temp_zip/www/* www/
           
           if [ -f "../temp_zip/icon.png" ]; then
             cp ../temp_zip/icon.png icon.png
           fi
           
-          # The ultimate Config file
-          cat << 'EOF' > config.xml
-          <?xml version='1.0' encoding='utf-8'?>
-          <widget id="com.format.converterstudio" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-              <name>Format Converter Studio</name>
-              <description>Direct File Conversion</description>
-              <author email="dev@null.com" href="https://example.com">Studio</author>
-              <content src="index.html" />
-              <access origin="*" />
-              <allow-intent href="http://*/*" />
-              <allow-intent href="https://*/*" />
-              <allow-navigation href="*" />
-              <preference name="scheme" value="https" />
-              <preference name="hostname" value="localhost" />
-              <icon src="icon.png" />
-          </widget>
-          EOF
+          # Create perfect config file (Safe generation)
+          echo "<?xml version='1.0' encoding='utf-8'?>" > config.xml
+          echo "<widget id='com.format.converterstudio' version='1.0.0' xmlns='http://www.w3.org/ns/widgets'>" >> config.xml
+          echo "  <name>Format Converter Studio</name>" >> config.xml
+          echo "  <description>Direct File Conversion</description>" >> config.xml
+          echo "  <author>Studio</author>" >> config.xml
+          echo "  <content src='index.html' />" >> config.xml
+          echo "  <access origin='*' />" >> config.xml
+          echo "  <allow-intent href='http://*/*' />" >> config.xml
+          echo "  <allow-intent href='https://*/*' />" >> config.xml
+          echo "  <allow-navigation href='*' />" >> config.xml
+          echo "  <preference name='scheme' value='https' />" >> config.xml
+          echo "  <preference name='hostname' value='localhost' />" >> config.xml
+          echo "  <icon src='icon.png' />" >> config.xml
+          echo "</widget>" >> config.xml
           
+          # Build App
           cordova plugin add cordova-plugin-file
           cordova platform add android
           cordova build android
           
-          mkdir -p ../output-apk
-          cp platforms/android/app/build/outputs/apk/debug/*.apk ../output-apk/
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: App-APK
-          path: output-apk/*.apk
-          # Wipe the empty default files
-          rm -rf www/*
-          
-          # BULLETPROOF FILE FINDER: Find index.html directly, no matter where it is hiding
-          USER_INDEX=$(find ../temp_zip -name "index.html" | head -n 1)
-          USER_WWW=$(dirname "$USER_INDEX")
-          
-          # Copy your real code into the app
-          cp -a "$USER_WWW"/. www/
-          
-          # Safely find and copy your icon
-          USER_ICON=$(find ../temp_zip -type f -name "icon.png" | head -n 1)
-          if [ ! -z "$USER_ICON" ]; then
-            cp "$USER_ICON" icon.png
-          fi
-          
-          # The ultimate Config file (Now with Network Access so your PDF tools load!)
-          cat << 'EOF' > config.xml
-          <?xml version='1.0' encoding='utf-8'?>
-          <widget id="com.format.converterstudio" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-              <name>Format Converter Studio</name>
-              <description>Direct File Conversion</description>
-              <author email="dev@null.com" href="https://example.com">Studio</author>
-              <content src="index.html" />
-              <access origin="*" />
-              <allow-intent href="http://*/*" />
-              <allow-intent href="https://*/*" />
-              <allow-navigation href="*" />
-              <preference name="scheme" value="https" />
-              <preference name="hostname" value="localhost" />
-              <icon src="icon.png" />
-          </widget>
-          EOF
-          
-          cordova plugin add cordova-plugin-file
-          cordova platform add android
-          cordova build android
-          
+          # Prepare APK
           mkdir -p ../output-apk
           cp platforms/android/app/build/outputs/apk/debug/*.apk ../output-apk/
 
