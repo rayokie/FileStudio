@@ -26,44 +26,46 @@ jobs:
       - name: Install Cordova
         run: npm install -g cordova
 
-      - name: Extract Project
+      - name: The Nuclear Option (Build from Scratch)
         run: |
-          mkdir my_app_extract
-          unzip FormatConverter.zip -d my_app_extract
-
-      - name: Build APK
-        run: |
-          # Find the root of the project safely
-          APP_DIR=$(dirname $(find my_app_extract -name "www" | head -n 1))
-          cd "$APP_DIR"
+          # 1. Unzip your files to a quarantine folder
+          mkdir temp_zip
+          unzip FormatConverter.zip -d temp_zip
           
-          # Force a perfectly clean config.xml
-          cat << 'EOF' > config.xml
-          <?xml version='1.0' encoding='utf-8'?>
-          <widget id="com.format.converterstudio" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-              <name>Format Converter Studio</name>
-              <description>Direct File Conversion</description>
-              <author email="dev@null.com" href="https://example.com">Studio</author>
-              <content src="index.html" />
-              <allow-intent href="http://*/*" />
-              <allow-intent href="https://*/*" />
-              <icon src="icon.png" />
-          </widget>
-          EOF
+          # 2. Create a brand new, perfectly clean App on the server
+          cordova create CloudApp com.format.converterstudio "Format Converter"
           
-          # Nuke any leftover phone-specific setup
-          rm -rf platforms node_modules plugins package-lock.json
-          npm install
+          # 3. Find ONLY your raw code and icon, leave all Termux junk behind
+          USER_WWW=$(find temp_zip -type d -name "www" | head -n 1)
+          USER_ICON=$(find temp_zip -type f -name "icon.png" | head -n 1)
           
-          # Build the App
-          cordova platform add android
+          # 4. Swap the default code with your code
+          rm -rf CloudApp/www
+          cp -r "$USER_WWW" CloudApp/www
+          
+          if [ ! -z "$USER_ICON" ]; then
+            cp "$USER_ICON" CloudApp/icon.png
+          fi
+          
+          # 5. Safely inject the icon setting into the new config
+          cd CloudApp
+          sed -i 's|</widget>|    <icon src="icon.png" />\n</widget>|g' config.xml
+          
+          # 6. Install the plugin and Build!
           cordova plugin add cordova-plugin-file
+          cordova platform add android
           cordova build android
           
-          # Move the finished APK to the upload zone
-          mkdir -p $GITHUB_WORKSPACE/output-apk
-          cp platforms/android/app/build/outputs/apk/debug/*.apk $GITHUB_WORKSPACE/output-apk/
+          # 7. Move the APK to the finish line
+          mkdir -p ../output-apk
+          cp platforms/android/app/build/outputs/apk/debug/*.apk ../output-apk/
 
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: App-APK
+          path: output-apk/*.apk
+          
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
