@@ -32,6 +32,8 @@ jobs:
       - name: Build APK
         run: |
           cd FormatConverter
+          rm -rf platforms node_modules plugins
+          npm install
           cordova platform add android
           cordova plugin add cordova-plugin-file
           cordova build android
@@ -41,3 +43,4 @@ jobs:
         with:
           name: App-APK
           path: FormatConverter/platforms/android/app/build/outputs/apk/debug/*.apk
+          
