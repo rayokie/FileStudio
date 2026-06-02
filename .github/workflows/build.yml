@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install Cordova
         run: npm install -g cordova
@@ -32,7 +32,7 @@ jobs:
       - name: Build APK
         run: |
           cd FormatConverter
-          rm -rf platforms node_modules plugins
+          rm -rf platforms node_modules plugins package-lock.json
           npm install
           cordova platform add android
           cordova plugin add cordova-plugin-file
