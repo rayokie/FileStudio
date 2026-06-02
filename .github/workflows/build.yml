@@ -28,35 +28,45 @@ jobs:
 
       - name: The Nuclear Option (Build from Scratch)
         run: |
-          # 1. Unzip your files to a quarantine folder
           mkdir temp_zip
           unzip FormatConverter.zip -d temp_zip
           
-          # 2. Create a brand new, perfectly clean App on the server
           cordova create CloudApp com.format.converterstudio "Format Converter"
+          cd CloudApp
           
-          # 3. Find ONLY your raw code and icon, leave all Termux junk behind
-          USER_WWW=$(find temp_zip -type d -name "www" | head -n 1)
-          USER_ICON=$(find temp_zip -type f -name "icon.png" | head -n 1)
+          # Wipe the default files
+          rm -rf www/*
           
-          # 4. Swap the default code with your code
-          rm -rf CloudApp/www
-          cp -r "$USER_WWW" CloudApp/www
+          # Force copy the CONTENTS of your www folder, not the folder itself
+          USER_WWW=$(find ../temp_zip -type d -name "www" | head -n 1)
+          cp -a "$USER_WWW"/. www/
           
+          USER_ICON=$(find ../temp_zip -type f -name "icon.png" | head -n 1)
           if [ ! -z "$USER_ICON" ]; then
-            cp "$USER_ICON" CloudApp/icon.png
+            cp "$USER_ICON" icon.png
           fi
           
-          # 5. Safely inject the icon setting into the new config
-          cd CloudApp
-          sed -i 's|</widget>|    <icon src="icon.png" />\n</widget>|g' config.xml
+          # The ultimate Config file with Android HTTP bypass rules
+          cat << 'EOF' > config.xml
+          <?xml version='1.0' encoding='utf-8'?>
+          <widget id="com.format.converterstudio" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+              <name>Format Converter Studio</name>
+              <description>Direct File Conversion</description>
+              <author email="dev@null.com" href="https://example.com">Studio</author>
+              <content src="index.html" />
+              <allow-intent href="http://*/*" />
+              <allow-intent href="https://*/*" />
+              <preference name="scheme" value="http" />
+              <preference name="hostname" value="localhost" />
+              <preference name="AndroidInsecureFileModeEnabled" value="true" />
+              <icon src="icon.png" />
+          </widget>
+          EOF
           
-          # 6. Install the plugin and Build!
           cordova plugin add cordova-plugin-file
           cordova platform add android
           cordova build android
           
-          # 7. Move the APK to the finish line
           mkdir -p ../output-apk
           cp platforms/android/app/build/outputs/apk/debug/*.apk ../output-apk/
 
@@ -65,11 +75,4 @@ jobs:
         with:
           name: App-APK
           path: output-apk/*.apk
-          
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: App-APK
-          path: output-apk/*.apk
-          
           
