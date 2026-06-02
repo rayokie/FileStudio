@@ -26,7 +26,7 @@ jobs:
       - name: Install Cordova
         run: npm install -g cordova
 
-      - name: The Nuclear Option (Build from Scratch)
+      - name: Build from Scratch
         run: |
           mkdir temp_zip
           unzip FormatConverter.zip -d temp_zip
@@ -34,6 +34,46 @@ jobs:
           cordova create CloudApp com.format.converterstudio "Format Converter"
           cd CloudApp
           
+          # Delete the dummy Cordova robot code
+          rm -rf www/*
+          
+          # DIRECT COPY: Grab your actual files based on your video, ignore the Termux backup!
+          cp -r ../temp_zip/www/* www/
+          
+          if [ -f "../temp_zip/icon.png" ]; then
+            cp ../temp_zip/icon.png icon.png
+          fi
+          
+          # The ultimate Config file
+          cat << 'EOF' > config.xml
+          <?xml version='1.0' encoding='utf-8'?>
+          <widget id="com.format.converterstudio" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+              <name>Format Converter Studio</name>
+              <description>Direct File Conversion</description>
+              <author email="dev@null.com" href="https://example.com">Studio</author>
+              <content src="index.html" />
+              <access origin="*" />
+              <allow-intent href="http://*/*" />
+              <allow-intent href="https://*/*" />
+              <allow-navigation href="*" />
+              <preference name="scheme" value="https" />
+              <preference name="hostname" value="localhost" />
+              <icon src="icon.png" />
+          </widget>
+          EOF
+          
+          cordova plugin add cordova-plugin-file
+          cordova platform add android
+          cordova build android
+          
+          mkdir -p ../output-apk
+          cp platforms/android/app/build/outputs/apk/debug/*.apk ../output-apk/
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: App-APK
+          path: output-apk/*.apk
           # Wipe the empty default files
           rm -rf www/*
           
