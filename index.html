@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filestudio</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div id="custom-splash">
+        <div class="splash-content">
+            <h1 class="splash-title">Filestudio</h1>
+            <div class="splash-underline"></div>
+        </div>
+    </div>
+
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <h3 id="loading-text">Processing File...</h3>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <div class="badge">
+                <span class="dot"></span> 100% SECURE LOCAL PROCESSING
+            </div>
+            <h1>Filestudio</h1>
+            <p>Direct File Conversion for Desktop & Mobile Devices</p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>Load File(s)</h3>
+                <p id="upload-hint">Tap below to select your original images</p>
+            </div>
+            
+            <div class="upload-container">
+                <input type="file" id="file-input-img" class="hidden-input" multiple accept="image/jpeg, image/png, image/webp, image/jpg">
+                <input type="file" id="file-input-pdf" class="hidden-input" accept=".pdf">
+                <input type="file" id="camera-input" class="hidden-input" accept="image/*" capture="environment">
+                
+                <div class="upload-zone" id="upload-zone">
+                    <div class="upload-content">
+                        <svg class="cloud-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
+                            <path d="M12 15v-6"></path>
+                            <path d="M9 12l3-3 3 3"></path>
+                        </svg>
+                        <h4>Tap to Choose File(s) from Storage</h4>
+                        <p>Processes locally in seconds</p>
+                    </div>
+                </div>
+
+                <button id="trigger-camera-btn" class="camera-btn-large">
+                    📷 Take Photo Directly
+                </button>
+
+                <p id="file-list" class="file-list"></p>
+            </div>
+        </div>
+
+        <div class="options-container" id="options-container">
+            <label class="checkbox-label">
+                <input type="checkbox" id="compress-checkbox">
+                <span class="checkmark"></span>
+                Compressed (Strictly limit final PDF under 500KB)
+            </label>
+        </div>
+
+        <div class="name-container">
+            <input type="text" id="custom-filename" class="custom-input" placeholder="Custom filename (optional)">
+        </div>
+
+        <div class="action-section">
+            <div id="status-message" class="status"></div>
+            <button id="convert-btn" class="primary-btn" disabled>Convert to PDF</button>
+        </div>
+
+        <div class="info-card">
+            <h4>💡 Why is this fast and secure?</h4>
+            <p>This application uses lightweight JavaScript and WebAssembly libraries to read and reconstruct files instantly. It processes everything locally without ever uploading your private files to a server.</p>
+        </div>
+    </div>
+
+    <div class="glass-dock bottom-nav">
+        <button class="nav-btn active" id="nav-img2pdf">
+            <span class="nav-icon">🖼️</span>
+            <span class="nav-text">Img to PDF</span>
+        </button>
+        <button class="nav-btn" id="nav-pdf2img">
+            <span class="nav-icon">📄</span>
+            <span class="nav-text">PDF to JPG</span>
+        </button>
+        <button class="nav-btn" id="nav-history">
+            <span class="nav-icon">🕒</span>
+            <span class="nav-text">History</span>
+        </button>
+    </div>
+
+    <div id="history-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Session History</h2>
+                <button id="close-history" class="close-btn">&times;</button>
+            </div>
+            <p class="modal-subtext">Files from your current session. (Clears when app is closed)</p>
+            <div id="history-list" class="history-list">
+                <div class="empty-history">No files converted yet.</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
