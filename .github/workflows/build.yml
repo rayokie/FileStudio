@@ -30,24 +30,19 @@ jobs:
         run: |
           unzip FormatConverter.zip -d temp_zip
           
-          # NEW APP NAME AND PACKAGE ID
           cordova create CloudApp com.filestudio.rayokie "FileStudio"
           cd CloudApp
           
-          # Delete the dummy Cordova robot code
           rm -rf www/*
-          
-          # Copy your custom HTML, CSS, JS
           cp -r ../temp_zip/www/* www/
           
-          # Copy your Icon
           if [ -f "../temp_zip/icon.png" ]; then
             cp ../temp_zip/icon.png icon.png
           fi
           
-          # Create perfect config file (Safe echo generation to prevent YAML syntax errors)
+          # Inject App Configuration and Android Manifest permissions
           echo "<?xml version='1.0' encoding='utf-8'?>" > config.xml
-          echo "<widget id='com.filestudio.rayokie' version='1.0.0' xmlns='http://www.w3.org/ns/widgets'>" >> config.xml
+          echo "<widget id='com.filestudio.rayokie' version='1.0.0' xmlns='http://www.w3.org/ns/widgets' xmlns:android='http://schemas.android.com/apk/res/android'>" >> config.xml
           echo "  <name>FileStudio</name>" >> config.xml
           echo "  <description>Direct File Conversion</description>" >> config.xml
           echo "  <author>Rayokie</author>" >> config.xml
@@ -58,19 +53,20 @@ jobs:
           echo "  <allow-navigation href='*' />" >> config.xml
           echo "  <preference name='scheme' value='https' />" >> config.xml
           echo "  <preference name='hostname' value='localhost' />" >> config.xml
-          echo "  " >> config.xml
           echo "  <preference name='SplashScreenDelay' value='0' />" >> config.xml
           echo "  <preference name='FadeSplashScreenDuration' value='0' />" >> config.xml
           echo "  <preference name='AndroidWindowSplashScreenBackground' value='#0B192C' />" >> config.xml
+          echo "  <preference name='ColorScheme' value='light dark' />" >> config.xml
           echo "  <icon src='icon.png' />" >> config.xml
           echo "</widget>" >> config.xml
           
-          # Build App with Native File Access
+          # Install Required Plugins
           cordova plugin add cordova-plugin-file
+          cordova plugin add cordova-plugin-android-permissions
+          
           cordova platform add android
           cordova build android
           
-          # Prepare APK
           mkdir -p ../output-apk
           cp platforms/android/app/build/outputs/apk/debug/*.apk ../output-apk/
 
