@@ -29,25 +29,28 @@ jobs:
       - name: Build from Scratch
         run: |
           unzip FormatConverter.zip -d temp_zip
-          cordova create CloudApp com.format.converterstudio "Format Converter"
+          
+          # NEW APP NAME AND PACKAGE ID
+          cordova create CloudApp com.filestudio.rayokie "FileStudio"
           cd CloudApp
           
           # Delete the dummy Cordova robot code
           rm -rf www/*
           
-          # Copy your actual HTML/CSS/JS files
+          # Copy your custom HTML, CSS, JS
           cp -r ../temp_zip/www/* www/
           
+          # Copy your Icon
           if [ -f "../temp_zip/icon.png" ]; then
             cp ../temp_zip/icon.png icon.png
           fi
           
-          # Create perfect config file (Safe generation)
+          # Create perfect config file (Safe echo generation to prevent YAML syntax errors)
           echo "<?xml version='1.0' encoding='utf-8'?>" > config.xml
-          echo "<widget id='com.format.converterstudio' version='1.0.0' xmlns='http://www.w3.org/ns/widgets'>" >> config.xml
-          echo "  <name>Format Converter Studio</name>" >> config.xml
+          echo "<widget id='com.filestudio.rayokie' version='1.0.0' xmlns='http://www.w3.org/ns/widgets'>" >> config.xml
+          echo "  <name>FileStudio</name>" >> config.xml
           echo "  <description>Direct File Conversion</description>" >> config.xml
-          echo "  <author>Studio</author>" >> config.xml
+          echo "  <author>Rayokie</author>" >> config.xml
           echo "  <content src='index.html' />" >> config.xml
           echo "  <access origin='*' />" >> config.xml
           echo "  <allow-intent href='http://*/*' />" >> config.xml
@@ -55,10 +58,14 @@ jobs:
           echo "  <allow-navigation href='*' />" >> config.xml
           echo "  <preference name='scheme' value='https' />" >> config.xml
           echo "  <preference name='hostname' value='localhost' />" >> config.xml
+          echo "  " >> config.xml
+          echo "  <preference name='SplashScreenDelay' value='0' />" >> config.xml
+          echo "  <preference name='FadeSplashScreenDuration' value='0' />" >> config.xml
+          echo "  <preference name='AndroidWindowSplashScreenBackground' value='#0B192C' />" >> config.xml
           echo "  <icon src='icon.png' />" >> config.xml
           echo "</widget>" >> config.xml
           
-          # Build App
+          # Build App with Native File Access
           cordova plugin add cordova-plugin-file
           cordova platform add android
           cordova build android
